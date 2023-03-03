@@ -29,17 +29,18 @@ app.get("/api/hello", function (req, res) {
 app.post("/api/shorturl", (req, res) => {
   const { url } = req.body;
 
+  //check if url is valid;
   if (
     dns.lookup(url, (err, address, family) => {
       console.log("address: %j family: IPv%s", address, family);
-      if (err) return err;
+      if (err) return false;
       return address;
     })
   ) {
-    return res.json({ error: "invalid URL" });
+    return res.json({ original_url: url, short_url: 1 });
   }
 
-  res.json({ original_url: url, short_url: 1 });
+  return res.json({ error: "invalid URL" });
 });
 
 app.listen(port, function () {
