@@ -4,6 +4,7 @@ const {
   FindOriginalUrl,
   FindShortenedUrl,
   getDocumentCount,
+  getRecentDocument,
 } = require("./service.js");
 
 require("dotenv").config();
@@ -87,4 +88,13 @@ app.get("/api/shorturl/:uId", async (req, res) => {
 
 app.listen(port, function () {
   console.log(`Listening on port ${port}`);
+});
+
+app.get("/api/recent", async (req, res) => {
+  let recentDoc = await getRecentDocument();
+  if (!recentDoc) {
+    console.log("no recent document found");
+    return res.status(404).send(json({ error: "no recent document found" }));
+  }
+  return res.json(recentDoc);
 });

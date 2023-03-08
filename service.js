@@ -79,10 +79,21 @@ const getDocumentCount = async () => {
   }
 };
 
+const getRecentDocument = async () => {
+  try {
+    let recentDoc = await Url.find({}).sort({ $natural: -1 }).limit(3);
+    return recentDoc;
+  } catch (err) {
+    console.error("Could not get the most recent document " + err);
+    return err;
+  }
+};
+
 module.exports = {
   main,
   CreateSaveUrl,
   FindOriginalUrl,
   FindShortenedUrl,
   getDocumentCount,
+  getRecentDocument,
 };
