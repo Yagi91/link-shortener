@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+// import mongoose from "mongoose";
+const mongoose = require("mongoose");
 require("dotenv").config();
 
 const Schema = mongoose.Schema;
@@ -12,12 +13,10 @@ async function main() {
       //
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useFindAndModify: false,
-      useCreateIndex: true,
     });
     console.log("MongoDB connected");
   } catch (err) {
-    console.err(err);
+    console.error(err);
   }
 }
 
@@ -36,7 +35,10 @@ const CreateSaveUrl = async (url, shortUrl) => {
     const savedUrl = await newUrl.save();
     return savedUrl;
   } catch (err) {
-    console.error(err);
+    console.error(
+      "Could not save to the new url to the database, because of the following error " +
+        err
+    );
     return err;
   }
 };
@@ -45,10 +47,12 @@ const CreateSaveUrl = async (url, shortUrl) => {
 const FindOriginalUrl = async (url) => {
   try {
     const foundUrl = await Url.findOne({ original_url: url });
+    console.log(Url);
     return foundUrl;
   } catch (err) {
-    console.error(err);
-    return err;
+    return console.error(
+      "Could not locate any url matching this in the database: " + err
+    );
   }
 };
 
@@ -58,7 +62,7 @@ const FindShortenedUrl = async (url) => {
     const foundUrl = await Url.findOne({ shortened_url: url });
     return foundUrl;
   } catch (err) {
-    console.error(err);
+    console.error("Could not locate the short url: " + err);
     return err;
   }
 };
@@ -67,9 +71,10 @@ const FindShortenedUrl = async (url) => {
 const getDocumentCount = async () => {
   try {
     const count = await Url.countDocuments({});
+    console.log("The number of documents are " + count);
     return count;
   } catch (err) {
-    console.error(err);
+    console.error("Could not count the number of available documents " + err);
     return err;
   }
 };

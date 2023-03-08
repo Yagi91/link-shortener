@@ -1,10 +1,10 @@
-import {
+const {
   main,
   CreateSaveUrl,
   FindOriginalUrl,
   FindShortenedUrl,
   getDocumentCount,
-} from "./service.js";
+} = require("./service.js");
 
 require("dotenv").config();
 const express = require("express");
@@ -35,7 +35,8 @@ app.get("/api/hello", function (req, res) {
   res.json({ greeting: "hello API" });
 });
 
-app.post("/api/shorturl", (req, res) => {
+//post request to create and save url
+app.post("/api/shorturl", async (req, res) => {
   const { url } = req.body;
   //check if url is valid;
   if (
@@ -46,30 +47,33 @@ app.post("/api/shorturl", (req, res) => {
     })
   ) {
     //check if url is already in db
-    if (FindOriginalUrl(url)) {
-      let _shortUrl = FindOriginalUrl(url).shortened_url;
+    const foundUrl = await FindOriginalUrl(url);
+    console.log("The found user is " + foundUrl);
+    if (foundUrl) {
+      let _shortUrl = foundUrl.shortened_url;
       //return short url in json format
-      return res.json({ original_url: url, short_url: _shortUrl });
-    } else {
-      let _shortUrl = getDocumentCount();
-      //save url to db
-      CreateSaveUrl(url, _shortUrl);
+      console.log("url already in db and short url is " + _shortUrl);
       return res.json({ original_url: url, short_url: _shortUrl });
     }
+    let _shortUrl = await getDocumentCount();
+    //save url to db
+    console.log("url not in db and short url is: " + _shortUrl);
+    await CreateSaveUrl(url, _shortUrl);
+    return res.json({ original_url: url, short_url: _shortUrl });
   }
-
+  console.log("invalid url");
   return res.json({ error: "invalid URL" });
 });
 
-app.get("/api/shorturl/:uId", (req, res) => {
+app.get("/api/shorturl/:uId", async (req, res) => {
   //find url in db
-  let _url = FindShortenedUrl(req.params.uId);
+  let _url = await FindShortenedUrl(req.params.uId);
   if (!_url) {
     console.log("link not found");
     return res.json({ error: "invalid URL" });
   }
   //redirect to url
-  res.redirect(_url.original_url);
+  return res.redirect(_url.original_url);
 });
 
 app.listen(port, function () {
