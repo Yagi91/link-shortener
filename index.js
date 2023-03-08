@@ -39,12 +39,19 @@ app.get("/api/hello", function (req, res) {
 app.post("/api/shorturl", async (req, res) => {
   const { url } = req.body;
   //check if url is valid;
+
+  function isUrlFormatValid(url) {
+    const regex = /^(ftp|http|https):\/\/[^ "]+$/;
+    return regex.test(url);
+  }
+
   if (
     dns.lookup(url, (err, address, family) => {
       console.log("address: %j family: IPv%s", address, family);
       if (err) return false;
       return address;
-    })
+    }) &&
+    isUrlFormatValid(url)
   ) {
     //check if url is already in db
     const foundUrl = await FindOriginalUrl(url);
@@ -70,7 +77,9 @@ app.get("/api/shorturl/:uId", async (req, res) => {
   let _url = await FindShortenedUrl(req.params.uId);
   if (!_url) {
     console.log("link not found");
-    return res.json({ error: "invalid URL" });
+    return res.json({
+      error: "invalid url, Ensure the link has been shortened ",
+    });
   }
   //redirect to url
   return res.redirect(_url.original_url);
