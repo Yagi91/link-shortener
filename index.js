@@ -1,3 +1,11 @@
+import {
+  main,
+  CreateSaveUrl,
+  FindOriginalUrl,
+  FindShortenedUrl,
+  getDocumentCount,
+} from "./service.js";
+
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -7,6 +15,7 @@ const dns = require("node:dns");
 
 // Basic Configuration
 const port = process.env.PORT || 3000;
+main();
 
 app.use(cors()); //To prevent cross-origin errors
 
@@ -28,7 +37,6 @@ app.get("/api/hello", function (req, res) {
 
 app.post("/api/shorturl", (req, res) => {
   const { url } = req.body;
-
   //check if url is valid;
   if (
     dns.lookup(url, (err, address, family) => {
@@ -37,10 +45,31 @@ app.post("/api/shorturl", (req, res) => {
       return address;
     })
   ) {
-    return res.json({ original_url: url, short_url: 1 });
+    //check if url is already in db
+    if (FindOriginalUrl(url)) {
+      let _shortUrl = FindOriginalUrl(url).shortened_url;
+      //return short url in json format
+      return res.json({ original_url: url, short_url: _shortUrl });
+    } else {
+      let _shortUrl = getDocumentCount();
+      //save url to db
+      CreateSaveUrl(url, _shortUrl);
+      return res.json({ original_url: url, short_url: _shortUrl });
+    }
   }
 
   return res.json({ error: "invalid URL" });
+});
+
+app.get("/api/shorturl/:uId", (req, res) => {
+  //find url in db
+  let _url = FindShortenedUrl(req.params.uId);
+  if (!_url) {
+    console.log("link not found");
+    return res.json({ error: "invalid URL" });
+  }
+  //redirect to url
+  res.redirect(_url.original_url);
 });
 
 app.listen(port, function () {
