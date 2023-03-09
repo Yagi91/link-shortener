@@ -1,10 +1,13 @@
 {
   "name": "shorturl",
   "version": "0.0.3",
-  "description": "API project for freeCodeCamp",
+  "description": "Microservice API project for Link shortening service",
   "main": "index.js",
+  "author": {
+    "name": "Bryan Timah",
+    "email": "bryantimah@gmail.com"},
   "engines": {
-    "node": "14.x"
+    "node": ">=16.17.0"
   },
   "scripts": {
     "start": "node index.js",
